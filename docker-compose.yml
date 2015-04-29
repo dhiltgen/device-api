@@ -1,0 +1,9 @@
+app:
+    build: .
+    command: python /code/device_api/manage.py runserver 0.0.0.0:80
+    environment:
+    - OW_SERVER
+    ports:
+    - "80:80"
+    volumes:
+    - .:/code
