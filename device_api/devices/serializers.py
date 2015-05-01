@@ -1,10 +1,29 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
-# TODO - Try to figure out how to dynamically change
-#        the fields, based on what's there
-# http://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
+import logging
+
+log = logging.getLogger(__name__)
+
+
+class SubdeviceSerializer(serializers.Serializer):
+    device = serializers.CharField(max_length=50)
+    label = serializers.CharField(max_length=50)
+    reading = serializers.CharField(max_length=20)
+
+
 class DeviceSerializer(serializers.Serializer):
-    id = serializers.CharField(max_length=50)
+    id = serializers.SerializerMethodField()
     type = serializers.CharField(max_length=20)
     family = serializers.CharField(max_length=3)
-    #temp = serializers.FloatField()
+    subdevices = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        return reverse('device-detail', kwargs={'device':obj.id},
+                       request=self.context['request'])
+
+    def get_subdevices(self, obj):
+        return [reverse('subdevice', kwargs={'device':obj.id,
+                                            'subdevice':x},
+                       request=self.context['request'])
+                for x in obj.subdevices]
