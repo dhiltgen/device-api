@@ -16,12 +16,17 @@ class SubdeviceSerializer(serializers.Serializer):
         """
         Attempt to figure out what the reading looks like and conver it
         """
+        if not obj.reading:
+            return None
+        if isinstance(obj.reading, float):
+            return obj.reading
+        if isinstance(obj.reading, int):
+            return obj.reading
         if re.match(r'\s*[0-9]+\s*$', obj.reading):
             return int(obj.reading)
-        elif re.match(r'\s*[0-9]+\.[0-9]+\s*$', obj.reading):
+        if re.match(r'\s*[0-9]+\.[0-9]+\s*$', obj.reading):
             return float(obj.reading)
-        else:
-            return obj.reading
+        return obj.reading
 
 
 class DeviceSerializer(serializers.Serializer):

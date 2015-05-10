@@ -28,11 +28,22 @@ class Subdevice(object):
         self.label = subdevice
         try:
             self.reading = str(server.read(ow_device + '/' + subdevice).decode())
-        except:
+            # XXX there's probably a better way...
+            if self.label == 'temperature' or \
+                    self.label == 'temphigh' or \
+                    self.label == 'templow':
+                self.reading = float(self.reading) * 9 / 5 + 32
+        except Exception as e:
+            log.exception("Failed to process reading: %r", e)
             self.reading = None
 
     def set_reading(self, reading):
         try:
+            log.error("BEFORE Setting %s/%s to %r", self.device, self.label, reading)
+            if '.' not in reading:
+                reading = bytes((int(reading),))
+            server = _connect(self.server)
+            log.error("Setting %s/%s to %r", self.device, self.label, reading)
             server.write(self.device + '/' + self.label, reading)
         except:
             log.exception("Failed to performing write of %s/%s <- %r",
@@ -57,6 +68,7 @@ class Device(object):
             self.subdevices = [os.path.basename(x) for x in server.dir(ow_device, slash=False, bus=False)]
 
 
+# TODO - This is probably leaking sockets...
 def _connect(server):
     try:
         if ':' in server:
