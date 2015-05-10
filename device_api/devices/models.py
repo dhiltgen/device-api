@@ -39,12 +39,11 @@ class Subdevice(object):
 
     def set_reading(self, reading):
         try:
-            log.error("BEFORE Setting %s/%s to %r", self.device, self.label, reading)
-            if '.' not in reading:
-                reading = bytes((int(reading),))
+            reading = str(reading)
+            device_path = "%s/%s" % (self.device, self.label)
             server = _connect(self.server)
-            log.error("Setting %s/%s to %r", self.device, self.label, reading)
-            server.write(self.device + '/' + self.label, reading)
+            log.info("Setting %r to %r (%r)", device_path , reading, type(reading))
+            server.write(device_path, reading)
         except:
             log.exception("Failed to performing write of %s/%s <- %r",
                           self.device, self.label, reading)
@@ -78,7 +77,7 @@ def _connect(server):
         log.info("Connecting to %s:%d", server, int(port))
         return protocol.proxy(server, int(port))
     except Exception as err:
-        log.exception("Failed to retrieve devices: %r", err)
+        log.exception("Failed to retrieve devices from %s:%d: %r", server, int(port), err)
         raise
 
 

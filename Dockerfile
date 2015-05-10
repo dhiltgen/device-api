@@ -1,4 +1,4 @@
-FROM django
+FROM django:python2
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
